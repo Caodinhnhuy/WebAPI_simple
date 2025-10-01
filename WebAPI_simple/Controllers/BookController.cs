@@ -1,62 +1,59 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Net;
-using WebAPI_simple.Data;
-using WebAPI_simple.Models.Domain;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebAPI_simple.CustomActionFilter;
 using WebAPI_simple.Models.DTO;
 using WebAPI_simple.Repositories;
 
 namespace WebAPI_simple.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class BooksController : ControllerBase
     {
-        private readonly AppDbContext _dbContext;
         private readonly IBookRepository _bookRepository;
 
-        public BooksController(AppDbContext dbContext, IBookRepository bookRepository)
+        public BooksController(IBookRepository bookRepository)
         {
-            _dbContext = dbContext;
             _bookRepository = bookRepository;
         }
 
         [HttpGet("get-all-books")]
-        public IActionResult GetAll()
+        public IActionResult GetAllBooks()
         {
-            // su dung reposity pattern  
-            var allBooks = _bookRepository.GetAllBooks();
-            return Ok(allBooks);
+            var books = _bookRepository.GetAllBooks();
+            return Ok(books);
         }
 
-        [HttpGet]
-        [Route("get-book-by-id/{id}")]
-        public IActionResult GetBookById([FromRoute] int id)
+        [HttpGet("get-book-by-id/{id}")]
+        public IActionResult GetBookById(int id)
         {
-            var bookWithIdDTO = _bookRepository.GetBookById(id);
-            return Ok(bookWithIdDTO);
+            var book = _bookRepository.GetBookById(id);
+            if (book == null) return NotFound();
+            return Ok(book);
         }
 
         [HttpPost("add-book")]
+        [ValidateModel]  // ✅ Validate tự động
         public IActionResult AddBook([FromBody] AddBookRequestDTO addBookRequestDTO)
         {
-            var bookAdd = _bookRepository.AddBook(addBookRequestDTO);
-            return Ok(bookAdd);
+            var book = _bookRepository.AddBook(addBookRequestDTO);
+            return Ok(book);
         }
 
         [HttpPut("update-book-by-id/{id}")]
-        public IActionResult UpdateBookById(int id, [FromBody] AddBookRequestDTO bookDTO)
+        [ValidateModel]  // ✅ Validate tự động
+        public IActionResult UpdateBook(int id, [FromBody] AddBookRequestDTO updateBookDTO)
         {
-            var updateBook = _bookRepository.UpdateBookById(id, bookDTO);
-            return Ok(updateBook);
+            var book = _bookRepository.UpdateBookById(id, updateBookDTO);
+            if (book == null) return NotFound();
+            return Ok(book);
         }
 
         [HttpDelete("delete-book-by-id/{id}")]
-        public IActionResult DeleteBookById(int id)
+        public IActionResult DeleteBook(int id)
         {
-            var deleteBook = _bookRepository.DeleteBookById(id);
-            return Ok(deleteBook);
+            var book = _bookRepository.DeleteBookById(id);
+            if (book == null) return NotFound();
+            return Ok(book);
         }
     }
 }

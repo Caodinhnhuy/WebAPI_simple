@@ -13,48 +13,56 @@ namespace WebAPI_simple.Repositories
             _context = context;
         }
 
-        public List<PublisherDTO> GetAllPublishers()
+        public List<Publisher> GetAllPublishers()
         {
-            return _context.Publishers.Select(p => new PublisherDTO
+            return _context.Publishers.ToList();
+        }
+
+        public Publisher? GetPublisherById(int id)
+        {
+            return _context.Publishers.FirstOrDefault(p => p.Id == id);
+        }
+
+        public Publisher AddPublisher(AddPublisherRequestDTO publisherDTO)
+        {
+          
+            var exists = _context.Publishers.Any(p => p.Name == publisherDTO.Name);
+            if (exists)
             {
-                Id = p.Id,
-                Name = p.Name
-            }).ToList();
-        }
+                throw new Exception("Publisher name already exists");
+            }
 
-        public PublisherNoIdDTO? GetPublisherById(int id)
-        {
-            var publisher = _context.Publishers.FirstOrDefault(p => p.Id == id);
-            if (publisher == null) return null;
+            var publisher = new Publisher
+            {
+                Name = publisherDTO.Name
+            };
 
-            return new PublisherNoIdDTO { Name = publisher.Name };
-        }
-
-        public AddPublisherRequestDTO AddPublisher(AddPublisherRequestDTO addPublisherRequestDTO)
-        {
-            var publisher = new Publisher { Name = addPublisherRequestDTO.Name };
             _context.Publishers.Add(publisher);
             _context.SaveChanges();
-            return addPublisherRequestDTO;
+
+            return publisher;
         }
 
-        public PublisherNoIdDTO? UpdatePublisherById(int id, PublisherNoIdDTO publisherNoIdDTO)
+
+        public Publisher? UpdatePublisher(int id, AddPublisherRequestDTO publisherDTO)
         {
             var publisher = _context.Publishers.FirstOrDefault(p => p.Id == id);
             if (publisher == null) return null;
 
-            publisher.Name = publisherNoIdDTO.Name;
+            publisher.Name = publisherDTO.Name;
             _context.SaveChanges();
-            return publisherNoIdDTO;
+
+            return publisher;
         }
 
-        public Publisher? DeletePublisherById(int id)
+        public Publisher? DeletePublisher(int id)
         {
             var publisher = _context.Publishers.FirstOrDefault(p => p.Id == id);
             if (publisher == null) return null;
 
             _context.Publishers.Remove(publisher);
             _context.SaveChanges();
+
             return publisher;
         }
     }

@@ -17,6 +17,7 @@ namespace WebAPI_simple.Models.Domain
 
         //navigation Properties – One publisher has many books
         public int PublisherID { get; set; }
+        public int PublisherId { get; internal set; }
         public Publisher Publisher { get; set; }
 
         //navigation Properties – One book has many book_author

@@ -59,38 +59,30 @@ namespace WebAPI_simple.Repositories
 
         public AddBookRequestDTO AddBook(AddBookRequestDTO addBookRequestDTO)
         {
-         
-            var bookDomainModel = new Book
+            // Validate PublisherId tồn tại
+            var publisherExists = _dbContext.Publishers.Any(p => p.Id == addBookRequestDTO.PublisherId);
+            if (!publisherExists)
+            {
+                throw new Exception("PublisherId does not exist");
+            }
+
+            var book = new Book
             {
                 Title = addBookRequestDTO.Title,
                 Description = addBookRequestDTO.Description,
-                IsRead = addBookRequestDTO.IsRead,
-                DateRead = addBookRequestDTO.DateRead,
                 Rate = addBookRequestDTO.Rate,
-                Genre = addBookRequestDTO.Genre,
-                CoverUrl = addBookRequestDTO.CoverUrl,
-                DateAdded = addBookRequestDTO.DateAdded,
-                PublisherID = addBookRequestDTO.PublisherID
+                PublisherId = addBookRequestDTO.PublisherId
             };
-           
-            _dbContext.Books.Add(bookDomainModel);
+
+            _dbContext.Books.Add(book);
             _dbContext.SaveChanges();
 
-           
-            foreach (var id in addBookRequestDTO.AuthorIds)
-            {
-                var _book_author = new Book_Author()
-                {
-                    BookId = bookDomainModel.Id,
-                    AuthorId = id
-                };
-                _dbContext.Books_Authors.Add(_book_author);
-                _dbContext.SaveChanges();
-            }
             return addBookRequestDTO;
         }
 
-       
+
+
+
         public AddBookRequestDTO? UpdateBookById(int id, AddBookRequestDTO bookDTO)
         {
             var bookDomain = _dbContext.Books.FirstOrDefault(n => n.Id == id);

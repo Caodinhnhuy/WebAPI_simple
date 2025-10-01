@@ -5,10 +5,10 @@ namespace WebAPI_simple.Repositories
 {
     public interface IPublisherRepository
     {
-        List<PublisherDTO> GetAllPublishers();
-        PublisherNoIdDTO GetPublisherById(int id);
-        AddPublisherRequestDTO AddPublisher(AddPublisherRequestDTO addPublisherRequestDTO);
-        PublisherNoIdDTO UpdatePublisherById(int id, PublisherNoIdDTO publisherNoIdDTO);
-        Publisher? DeletePublisherById(int id);
+        List<Publisher> GetAllPublishers();
+        Publisher? GetPublisherById(int id);
+        Publisher AddPublisher(AddPublisherRequestDTO publisherDTO);
+        Publisher? UpdatePublisher(int id, AddPublisherRequestDTO publisherDTO);
+        Publisher? DeletePublisher(int id);
     }
 }

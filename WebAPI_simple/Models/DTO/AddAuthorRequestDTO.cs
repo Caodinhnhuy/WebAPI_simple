@@ -1,7 +1,11 @@
-﻿namespace WebAPI_simple.Models.DTO
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WebAPI_simple.Models.DTO
 {
     public class AddAuthorRequestDTO
     {
-        public string FullName { get; set; }
+        [Required(ErrorMessage = "Author name is required")]
+        [MinLength(3, ErrorMessage = "Author name must be at least 3 characters")]
+        public string FullName { get; set; } = string.Empty;
     }
 }

@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebAPI_simple.CustomActionFilter;
 using WebAPI_simple.Models.DTO;
 using WebAPI_simple.Repositories;
 
 namespace WebAPI_simple.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AuthorsController : ControllerBase
     {
         private readonly IAuthorRepository _authorRepository;
@@ -18,7 +19,8 @@ namespace WebAPI_simple.Controllers
         [HttpGet]
         public IActionResult GetAllAuthors()
         {
-            return Ok(_authorRepository.GetAllAuthors());
+            var authors = _authorRepository.GetAllAuthors();
+            return Ok(authors);
         }
 
         [HttpGet("{id}")]
@@ -30,26 +32,28 @@ namespace WebAPI_simple.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddAuthor(AddAuthorRequestDTO addAuthorRequestDTO)
+        [ValidateModel]  // ✅ Validate tự động
+        public IActionResult AddAuthor([FromBody] AddAuthorRequestDTO addAuthorRequestDTO)
         {
             var author = _authorRepository.AddAuthor(addAuthorRequestDTO);
-            return CreatedAtAction(nameof(GetAuthorById), new { id = author.FullName }, author);
+            return Ok(author);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateAuthorById(int id, AuthorNoIdDTO authorNoIdDTO)
+        [ValidateModel]  // ✅ Validate tự động
+        public IActionResult UpdateAuthor(int id, [FromBody] AuthorNoIdDTO authorNoIdDTO)
         {
-            var updated = _authorRepository.UpdateAuthorById(id, authorNoIdDTO);
-            if (updated == null) return NotFound();
-            return Ok(updated);
+            var author = _authorRepository.UpdateAuthorById(id, authorNoIdDTO);
+            if (author == null) return NotFound();
+            return Ok(author);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteAuthorById(int id)
+        public IActionResult DeleteAuthor(int id)
         {
-            var deleted = _authorRepository.DeleteAuthorById(id);
-            if (deleted == null) return NotFound();
-            return Ok(deleted);
+            var author = _authorRepository.DeleteAuthorById(id);
+            if (author == null) return NotFound();
+            return Ok(author);
         }
     }
 }
