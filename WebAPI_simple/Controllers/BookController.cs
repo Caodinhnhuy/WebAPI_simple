@@ -17,22 +17,21 @@ namespace WebAPI_simple.Controllers
         }
 
         [HttpGet("get-all-books")]
-        public IActionResult GetAllBooks()
+                public IActionResult GetAll(
+            [FromQuery] string? filterOn,
+            [FromQuery] string? filterQuery,
+            [FromQuery] string? sortBy,
+            [FromQuery] bool isAscending,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 100
+)
         {
-            var books = _bookRepository.GetAllBooks();
-            return Ok(books);
-        }
-
-        [HttpGet("get-book-by-id/{id}")]
-        public IActionResult GetBookById(int id)
-        {
-            var book = _bookRepository.GetBookById(id);
-            if (book == null) return NotFound();
-            return Ok(book);
+            var allBooks = _bookRepository.GetAllBooks(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
+            return Ok(allBooks);
         }
 
         [HttpPost("add-book")]
-        [ValidateModel]  // ✅ Validate tự động
+        [ValidateModel] 
         public IActionResult AddBook([FromBody] AddBookRequestDTO addBookRequestDTO)
         {
             var book = _bookRepository.AddBook(addBookRequestDTO);
@@ -40,7 +39,7 @@ namespace WebAPI_simple.Controllers
         }
 
         [HttpPut("update-book-by-id/{id}")]
-        [ValidateModel]  // ✅ Validate tự động
+        [ValidateModel] 
         public IActionResult UpdateBook(int id, [FromBody] AddBookRequestDTO updateBookDTO)
         {
             var book = _bookRepository.UpdateBookById(id, updateBookDTO);
