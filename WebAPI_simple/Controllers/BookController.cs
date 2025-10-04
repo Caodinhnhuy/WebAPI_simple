@@ -1,58 +1,55 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using WebAPI_simple.CustomActionFilter;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using WebAPI_simple.Data;
+using WebAPI_simple.Models.Domain;
 using WebAPI_simple.Models.DTO;
-using WebAPI_simple.Repositories;
 
 namespace WebAPI_simple.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly IBookRepository _bookRepository;
+        private readonly AppDbContext _context;
 
-        public BooksController(IBookRepository bookRepository)
+        private readonly ILogger<BooksController> _logger;
+
+        public BooksController(AppDbContext context, ILogger<BooksController> logger)
         {
-            _bookRepository = bookRepository;
+            _context = context;
+            _logger = logger;
         }
 
-        [HttpGet("get-all-books")]
-                public IActionResult GetAll(
-            [FromQuery] string? filterOn,
-            [FromQuery] string? filterQuery,
-            [FromQuery] string? sortBy,
-            [FromQuery] bool isAscending,
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 100
-)
+      
+        [HttpGet]
+        public IActionResult GetAllBooks()
         {
-            var allBooks = _bookRepository.GetAllBooks(filterOn, filterQuery, sortBy, isAscending, pageNumber, pageSize);
-            return Ok(allBooks);
+            _logger.LogInformation(" API GetAllBooks() được gọi lúc {time}", DateTime.Now);
+
+            var books = _context.Books.ToList();
+            _logger.LogInformation("Tổng số sách: {count}", books.Count);
+
+            return Ok(books);
         }
 
-        [HttpPost("add-book")]
-        [ValidateModel] 
-        public IActionResult AddBook([FromBody] AddBookRequestDTO addBookRequestDTO)
-        {
-            var book = _bookRepository.AddBook(addBookRequestDTO);
-            return Ok(book);
-        }
-
-        [HttpPut("update-book-by-id/{id}")]
-        [ValidateModel] 
-        public IActionResult UpdateBook(int id, [FromBody] AddBookRequestDTO updateBookDTO)
-        {
-            var book = _bookRepository.UpdateBookById(id, updateBookDTO);
-            if (book == null) return NotFound();
-            return Ok(book);
-        }
-
-        [HttpDelete("delete-book-by-id/{id}")]
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteBook(int id)
         {
-            var book = _bookRepository.DeleteBookById(id);
-            if (book == null) return NotFound();
-            return Ok(book);
+            _logger.LogWarning("⚠ Admin đang xóa sách có Id = {id}", id);
+
+            var book = _context.Books.FirstOrDefault(b => b.Id == id);
+            if (book == null)
+            {
+                _logger.LogError("Không tìm thấy sách có Id = {id}", id);
+                return NotFound();
+            }
+
+            _context.Books.Remove(book);
+            _context.SaveChanges();
+
+            _logger.LogInformation("Đã xóa sách có Id = {id}", id);
+            return Ok("Book deleted successfully!");
         }
     }
 }

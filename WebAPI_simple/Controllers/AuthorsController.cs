@@ -32,7 +32,7 @@ namespace WebAPI_simple.Controllers
         }
 
         [HttpPost]
-        [ValidateModel]  // ✅ Validate tự động
+        [ValidateModel]
         public IActionResult AddAuthor([FromBody] AddAuthorRequestDTO addAuthorRequestDTO)
         {
             var author = _authorRepository.AddAuthor(addAuthorRequestDTO);
@@ -40,7 +40,7 @@ namespace WebAPI_simple.Controllers
         }
 
         [HttpPut("{id}")]
-        [ValidateModel]  // ✅ Validate tự động
+        [ValidateModel] 
         public IActionResult UpdateAuthor(int id, [FromBody] AuthorNoIdDTO authorNoIdDTO)
         {
             var author = _authorRepository.UpdateAuthorById(id, authorNoIdDTO);
